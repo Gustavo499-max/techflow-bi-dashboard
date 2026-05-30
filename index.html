@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TechFlow BI – Dashboard Executivo de Engenharia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg: #0a0c10;
+  --bg2: #111318;
+  --bg3: #181c23;
+  --card: #13161d;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8eaf0;
+  --muted: #7a8099;
+  --accent: #3ecf8e;
+  --accent2: #5b8fff;
+  --accent3: #f6a623;
+  --accent4: #e05a5a;
+  --accent5: #a78bfa;
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10,12,16,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem; height: 56px;
+}
+.nav-brand { font-family: var(--font-head); font-size: 18px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+.nav-brand span { color: var(--text); }
+.nav-tabs { display: flex; gap: 4px; }
+.nav-tab {
+  font-size: 12px; font-weight: 500; padding: 6px 14px;
+  border-radius: 6px; cursor: pointer; border: none; background: none;
+  color: var(--muted); transition: all .2s; font-family: var(--font-body);
+}
+.nav-tab:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+.nav-tab.active { color: var(--bg); background: var(--accent); }
+.nav-badge { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+
+/* ── SECTIONS ── */
+section { display: none; }
+section.active { display: block; }
+
+/* ── HERO ── */
+.hero {
+  padding: 3rem 2rem 2rem;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(62,207,142,0.04) 0%, transparent 60%);
+}
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--accent);
+  border: 1px solid rgba(62,207,142,0.25); border-radius: 20px;
+  padding: 3px 10px; margin-bottom: 1rem;
+}
+.hero-tag::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--accent); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+.hero h1 { font-family: var(--font-head); font-size: clamp(28px,4vw,48px); font-weight: 800; line-height: 1.1; letter-spacing: -1px; margin-bottom: .75rem; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero p { color: var(--muted); max-width: 620px; font-size: 15px; margin-bottom: 1.5rem; }
+.hero-meta { display: flex; gap: 2rem; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.hero-meta span { display: flex; align-items: center; gap: 6px; }
+.hero-meta b { color: var(--text); }
+
+/* ── GRID LAYOUTS ── */
+.container { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; }
+.grid-auto { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 1rem; }
+@media(max-width:900px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+
+/* ── CARDS ── */
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.25rem; position: relative; overflow: hidden;
+}
+.card::before { content:''; position:absolute; inset:0; border-radius:12px; pointer-events:none; }
+.card-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: .5rem; }
+.card-value { font-family: var(--font-head); font-size: 32px; font-weight: 800; line-height: 1; margin-bottom: .25rem; }
+.card-delta { font-size: 12px; display: flex; align-items: center; gap: 4px; }
+.delta-up { color: var(--accent); }
+.delta-down { color: var(--accent4); }
+.card-accent-green { border-left: 3px solid var(--accent); }
+.card-accent-blue { border-left: 3px solid var(--accent2); }
+.card-accent-orange { border-left: 3px solid var(--accent3); }
+.card-accent-red { border-left: 3px solid var(--accent4); }
+.card-accent-purple { border-left: 3px solid var(--accent5); }
+
+/* ── SECTION HEADERS ── */
+.sec-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1rem; padding-top: 1.5rem; }
+.sec-title { font-family: var(--font-head); font-size: 20px; font-weight: 700; }
+.sec-sub { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+
+/* ── DORA GAUGE ── */
+.dora-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1rem; }
+@media(max-width:900px){.dora-grid{grid-template-columns:1fr 1fr;}}
+.dora-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:1.25rem; text-align:center; }
+.dora-icon { font-size:28px; margin-bottom:.5rem; }
+.dora-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-bottom:.25rem; }
+.dora-value { font-family:var(--font-head); font-size:24px; font-weight:800; }
+.dora-band { font-size:11px; font-family:var(--font-mono); margin-top:.25rem; padding:2px 8px; border-radius:20px; display:inline-block; }
+.band-elite { background:rgba(62,207,142,.15); color:var(--accent); }
+.band-high { background:rgba(91,143,255,.15); color:var(--accent2); }
+.band-medium { background:rgba(246,166,35,.15); color:var(--accent3); }
+.band-low { background:rgba(224,90,90,.15); color:var(--accent4); }
+
+/* ── TABLE ── */
+.tbl-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+thead tr { border-bottom:1px solid var(--border2); }
+th { padding:10px 12px; text-align:left; font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); white-space:nowrap; }
+td { padding:10px 12px; border-bottom:1px solid var(--border); color:var(--text); }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:rgba(255,255,255,0.02); }
+.pill { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-family:var(--font-mono); }
+.pill-green { background:rgba(62,207,142,.15); color:var(--accent); }
+.pill-red { background:rgba(224,90,90,.15); color:var(--accent4); }
+.pill-orange { background:rgba(246,166,35,.15); color:var(--accent3); }
+.pill-blue { background:rgba(91,143,255,.15); color:var(--accent2); }
+.pill-purple { background:rgba(167,139,250,.15); color:var(--accent5); }
+
+/* ── CHART CONTAINERS ── */
+.chart-box { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:1.25rem; }
+.chart-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; }
+.chart-title { font-size:13px; font-weight:600; }
+.chart-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+.chart-canvas-wrap { position:relative; width:100%; }
+.legend-row { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:10px; font-size:12px; color:var(--muted); }
+.legend-row span { display:flex; align-items:center; gap:5px; }
+.legend-dot { width:10px; height:10px; border-radius:2px; }
+
+/* ── PIPELINE ── */
+.pipeline { display:flex; align-items:center; gap:0; overflow-x:auto; padding-bottom:.5rem; }
+.pipe-step {
+  background:var(--bg3); border:1px solid var(--border2); border-radius:10px;
+  padding:.75rem 1rem; min-width:140px; flex-shrink:0; position:relative;
+}
+.pipe-arrow { width:32px; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:18px; }
+.pipe-layer { font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:4px; font-family:var(--font-mono); }
+.pipe-name { font-size:13px; font-weight:600; }
+.pipe-detail { font-size:11px; color:var(--muted); margin-top:3px; }
+.pipe-badge { position:absolute; top:-8px; right:8px; font-size:10px; font-family:var(--font-mono); padding:2px 7px; border-radius:20px; }
+
+/* ── STAR SCHEMA ── */
+.schema-wrap { display:flex; flex-direction:column; align-items:center; gap:0; padding:1rem 0; }
+.schema-fact {
+  background:rgba(62,207,142,.08); border:2px solid rgba(62,207,142,.35);
+  border-radius:12px; padding:1rem 1.5rem; min-width:260px; text-align:center;
+}
+.schema-fact-label { font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--accent); font-family:var(--font-mono); margin-bottom:.5rem; }
+.schema-fact-name { font-family:var(--font-head); font-size:18px; font-weight:700; color:var(--accent); }
+.schema-dims { display:flex; flex-wrap:wrap; justify-content:center; gap:1rem; margin-top:1rem; }
+.schema-dim {
+  background:rgba(91,143,255,.08); border:1px solid rgba(91,143,255,.3);
+  border-radius:10px; padding:.75rem 1rem; min-width:150px;
+}
+.schema-dim-label { font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--accent2); font-family:var(--font-mono); margin-bottom:.25rem; }
+.schema-dim-name { font-size:13px; font-weight:600; color:var(--accent2); }
+.schema-fields { margin-top:.5rem; font-size:11px; color:var(--muted); line-height:1.8; }
+.schema-pk { color:var(--accent3); }
+.schema-fk { color:var(--accent5); }
+.schema-line { width:2px; height:24px; background:var(--border2); margin:0 auto; }
+
+/* ── SQL BLOCK ── */
+.sql-block {
+  background:#0d1117; border:1px solid var(--border2); border-radius:10px;
+  padding:1rem 1.25rem; font-family:var(--font-mono); font-size:12px; line-height:1.9;
+  overflow-x:auto;
+}
+.sql-kw { color:#79c0ff; }
+.sql-fn { color:#d2a8ff; }
+.sql-str { color:#a5d6ff; }
+.sql-cmt { color:#484f58; font-style:italic; }
+.sql-num { color:#f0883e; }
+.sql-tbl { color:#7ee787; }
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  display:flex; gap:.75rem; flex-wrap:wrap; padding:1rem 2rem;
+  border-bottom:1px solid var(--border); background:var(--bg2);
+}
+.filter-group { display:flex; align-items:center; gap:.5rem; }
+.filter-label { font-size:11px; color:var(--muted); font-family:var(--font-mono); }
+select {
+  background:var(--bg3); border:1px solid var(--border2); color:var(--text);
+  border-radius:6px; padding:5px 10px; font-size:12px; font-family:var(--font-body);
+  cursor:pointer; outline:none;
+}
+select:focus { border-color:var(--accent); }
+
+/* ── PROGRESS BARS ── */
+.prog-bar-wrap { margin:.5rem 0; }
+.prog-bar-top { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:4px; }
+.prog-bar-bg { background:rgba(255,255,255,.07); border-radius:4px; height:8px; }
+.prog-bar-fill { height:8px; border-radius:4px; transition:width .6s ease; }
+
+/* ── ANALYSIS BLOCKS ── */
+.analysis-block {
+  background:var(--card); border:1px solid var(--border); border-radius:12px; padding:1.25rem;
+  display:flex; gap:1rem; align-items:flex-start;
+}
+.analysis-icon { font-size:24px; flex-shrink:0; }
+.analysis-title { font-size:13px; font-weight:600; margin-bottom:.35rem; }
+.analysis-text { font-size:12px; color:var(--muted); line-height:1.7; }
+
+/* ── TABS INSIDE SECTION ── */
+.inner-tabs { display:flex; gap:4px; margin-bottom:1.25rem; }
+.inner-tab {
+  font-size:12px; padding:5px 12px; border-radius:6px; cursor:pointer;
+  border:1px solid var(--border); background:none; color:var(--muted); font-family:var(--font-body);
+  transition:all .15s;
+}
+.inner-tab.active { background:var(--bg3); color:var(--text); border-color:var(--border2); }
+
+/* ── FOOTER ── */
+footer {
+  border-top:1px solid var(--border); padding:1.5rem 2rem;
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:11px; color:var(--muted); font-family:var(--font-mono);
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">Tech<span>Flow</span> BI</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showSection('overview')">Visão Geral</button>
+    <button class="nav-tab" onclick="showSection('modelagem')">Modelagem</button>
+    <button class="nav-tab" onclick="showSection('pipeline')">Pipeline ELT</button>
+    <button class="nav-tab" onclick="showSection('dashboard')">Dashboard CTO</button>
+    <button class="nav-tab" onclick="showSection('estrategia')">Análise Estratégica</button>
+  </div>
+  <div class="nav-badge">DORA 2025 · Q2 2025</div>
+</nav>
+
+<!-- SECTION: VISÃO GERAL -->
+<section id="overview" class="active">
+  <div class="hero">
+    <div class="hero-tag">BI para Engenharia de Software · TechFlow</div>
+    <h1>Do <em>Caos</em> à Performance:<br>BI no Fluxo Assistido por IA</h1>
+    <p>Solução analítica completa baseada no framework DORA 2025 para diagnosticar gargalos, medir o impacto real da IA Generativa e conectar esforço técnico ao valor de negócio.</p>
+    <div class="hero-meta">
+      <span>📐 <b>Framework:</b> DORA 2025</span>
+      <span>🗄️ <b>Arquitetura:</b> ELT + Star Schema</span>
+      <span>📊 <b>Fontes:</b> GitHub API + Jira API</span>
+      <span>🏗️ <b>DW:</b> BigQuery / Snowflake</span>
+    </div>
+  </div>
+
+  <!-- DORA KPIs -->
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-title">Métricas DORA — Status Atual</div>
+      <div class="sec-sub">Período: Jan–Jun 2025 · Todos os squads</div>
+    </div>
+    <div class="dora-grid">
+      <div class="dora-card card-accent-orange">
+        <div class="dora-icon">⏱️</div>
+        <div class="dora-label">Lead Time for Change</div>
+        <div class="dora-value" style="color:var(--accent3)">4,2 dias</div>
+        <div class="dora-band band-medium">Médio</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:.5rem">Meta: &lt; 1 dia (Elite)</div>
+      </div>
+      <div class="dora-card card-accent-red">
+        <div class="dora-icon">🚀</div>
+        <div class="dora-label">Deploy Frequency</div>
+        <div class="dora-value" style="color:var(--accent4)">3,1/sem</div>
+        <div class="dora-band band-medium">Médio</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:.5rem">Meta: Múltiplos/dia (Elite)</div>
+      </div>
+      <div class="dora-card card-accent-blue">
+        <div class="dora-icon">🔁</div>
+        <div class="dora-label">Change Failure Rate</div>
+        <div class="dora-value" style="color:var(--accent2)">18,4%</div>
+        <div class="dora-band band-low">Baixo</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:.5rem">Meta: 0–5% (Elite)</div>
+      </div>
+      <div class="dora-card card-accent-green">
+        <div class="dora-icon">⚡</div>
+        <div class="dora-label">MTTR</div>
+        <div class="dora-value" style="color:var(--accent)">2,3h</div>
+        <div class="dora-band band-high">Alto</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:.5rem">Meta: &lt; 1h (Elite)</div>
+      </div>
+    </div>
+
+    <!-- SUMÁRIO DA SITUAÇÃO -->
+    <div class="grid-2" style="margin-top:1rem;">
+      <div class="chart-box">
+        <div class="chart-head">
+          <div><div class="chart-title">Tendência de Deploys vs Falhas (6 meses)</div><div class="chart-sub">Impacto da adoção de IA Generativa</div></div>
+        </div>
+        <div class="legend-row">
+          <span><span class="legend-dot" style="background:#5b8fff"></span>Deploys/sem</span>
+          <span><span class="legend-dot" style="background:#e05a5a"></span>Falhas pós-deploy (%)</span>
+        </div>
+        <div class="chart-canvas-wrap" style="height:220px">
+          <canvas id="chartTendencia" role="img" aria-label="Gráfico de deploys e falhas nos últimos 6 meses">Tendência de deploys vs falhas de Jan a Jun 2025.</canvas>
+        </div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-head">
+          <div><div class="chart-title">Lead Time por Squad (dias)</div><div class="chart-sub">Distribuição por equipe — média mensal</div></div>
+        </div>
+        <div class="legend-row">
+          <span><span class="legend-dot" style="background:#3ecf8e"></span>Lead Time médio</span>
+          <span><span class="legend-dot" style="background:rgba(255,255,255,0.15)"></span>Meta elite</span>
+        </div>
+        <div class="chart-canvas-wrap" style="height:220px">
+          <canvas id="chartSquad" role="img" aria-label="Lead time por squad">Lead time distribuído por squad em dias.</canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALERTA ESTRATÉGICO -->
+    <div style="margin-top:1rem;display:grid;gap:1rem;">
+      <div class="analysis-block" style="border-color:rgba(246,166,35,.3);background:rgba(246,166,35,.05)">
+        <div class="analysis-icon">⚠️</div>
+        <div>
+          <div class="analysis-title" style="color:var(--accent3)">Diagnóstico: IA amplificando caos, não valor</div>
+          <div class="analysis-text">O volume de code commits cresceu 47% após adoção de IA, porém a Change Failure Rate subiu de 9% para 18,4%. O Lead Time permanece em 4,2 dias — indicando que o gargalo está no code review, não na escrita de código. A IA está acelerando a produção de código, mas os processos de qualidade e revisão não escalaram no mesmo ritmo.</div>
+        </div>
+      </div>
+      <div class="analysis-block" style="border-color:rgba(62,207,142,.3);background:rgba(62,207,142,.05)">
+        <div class="analysis-icon">🎯</div>
+        <div>
+          <div class="analysis-title" style="color:var(--accent)">Oportunidade identificada</div>
+          <div class="analysis-text">Squads que combinam IA + processos estruturados de review apresentam Lead Time 62% menor e CFR abaixo de 5%. A solução não é remover a IA, mas instrumentar o pipeline com BI para identificar onde a qualidade se perde e atuar preventivamente.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION: MODELAGEM DIMENSIONAL -->
+<section id="modelagem">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-title">Modelagem Dimensional — Star Schema</div>
+      <div class="sec-sub">1 Fato · 4 Dimensões · Kimball Methodology</div>
+    </div>
+
+    <!-- STAR SCHEMA VISUAL -->
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-title">Diagrama — Star Schema</div>
+      <div class="schema-wrap">
+        <div class="schema-fact">
+          <div class="schema-fact-label">⭐ Tabela de Fatos</div>
+          <div class="schema-fact-name">fato_deploys</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:.5rem;font-family:var(--font-mono)">Granularidade: 1 linha por deploy</div>
+        </div>
+        <div class="schema-line"></div>
+        <div class="schema-dims">
+          <div class="schema-dim">
+            <div class="schema-dim-label">📅 Dimensão</div>
+            <div class="schema-dim-name">dim_time</div>
+            <div class="schema-fields">
+              <span class="schema-pk">🔑 time_key</span><br>
+              data_deploy<br>ano · semestre<br>trimestre · mês<br>semana · dia_semana<br>hora_deploy
+            </div>
+          </div>
+          <div class="schema-dim">
+            <div class="schema-dim-label">📦 Dimensão</div>
+            <div class="schema-dim-name">dim_repository</div>
+            <div class="schema-fields">
+              <span class="schema-pk">🔑 repo_key</span><br>
+              nome_repo<br>squad_owner<br>linguagem_principal<br>tipo (backend/front)<br>criticidade
+            </div>
+          </div>
+          <div class="schema-dim">
+            <div class="schema-dim-label">👤 Dimensão</div>
+            <div class="schema-dim-name">dim_engineer</div>
+            <div class="schema-fields">
+              <span class="schema-pk">🔑 eng_key</span><br>
+              nome_engenheiro<br>squad<br>nível (jr/pl/sr)<br>usa_ia_assistida<br>anos_experiência
+            </div>
+          </div>
+          <div class="schema-dim">
+            <div class="schema-dim-label">🎫 Dimensão</div>
+            <div class="schema-dim-name">dim_feature</div>
+            <div class="schema-fields">
+              <span class="schema-pk">🔑 feature_key</span><br>
+              jira_ticket_id<br>tipo (bug/feat/chore)<br>épico<br>squad<br>prioridade
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABELA FATO DETALHADA -->
+    <div class="sec-header">
+      <div class="sec-title" style="font-size:16px">Tabela de Fatos: fato_deploys</div>
+      <div class="sec-sub">Métricas e chaves estrangeiras</div>
+    </div>
+    <div class="card tbl-wrap" style="margin-bottom:1rem;">
+      <table>
+        <thead><tr>
+          <th>Campo</th><th>Tipo</th><th>Descrição</th><th>Origem</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="font-family:var(--font-mono);color:var(--accent3)">deploy_id</td><td><span class="pill pill-orange">PK</span></td><td>Chave primária do deploy</td><td>Sistema DW</td></tr>
+          <tr><td style="font-family:var(--font-mono);color:var(--accent5)">time_key</td><td><span class="pill pill-purple">FK</span></td><td>Referência à dim_time</td><td>GitHub API</td></tr>
+          <tr><td style="font-family:var(--font-mono);color:var(--accent5)">repo_key</td><td><span class="pill pill-purple">FK</span></td><td>Referência à dim_repository</td><td>GitHub API</td></tr>
+          <tr><td style="font-family:var(--font-mono);color:var(--accent5)">eng_key</td><td><span class="pill pill-purple">FK</span></td><td>Referência à dim_engineer</td><td>GitHub + Jira</td></tr>
+          <tr><td style="font-family:var(--font-mono);color:var(--accent5)">feature_key</td><td><span class="pill pill-purple">FK</span></td><td>Referência à dim_feature</td><td>Jira API</td></tr>
+          <tr><td style="font-family:var(--font-mono)">lead_time_horas</td><td><span class="pill pill-blue">FLOAT</span></td><td>Horas entre 1º commit e deploy em produção</td><td>Calculado</td></tr>
+          <tr><td style="font-family:var(--font-mono)">tempo_review_horas</td><td><span class="pill pill-blue">FLOAT</span></td><td>Duração total do code review (abertura → merge)</td><td>GitHub API</td></tr>
+          <tr><td style="font-family:var(--font-mono)">qtd_revisores</td><td><span class="pill pill-blue">INT</span></td><td>Número de engenheiros que revisaram o PR</td><td>GitHub API</td></tr>
+          <tr><td style="font-family:var(--font-mono)">qtd_commits</td><td><span class="pill pill-blue">INT</span></td><td>Commits no PR (proxy de complexidade)</td><td>GitHub API</td></tr>
+          <tr><td style="font-family:var(--font-mono)">linhas_adicionadas</td><td><span class="pill pill-blue">INT</span></td><td>Linhas inseridas no PR</td><td>GitHub API</td></tr>
+          <tr><td style="font-family:var(--font-mono)">linhas_removidas</td><td><span class="pill pill-blue">INT</span></td><td>Linhas removidas no PR</td><td>GitHub API</td></tr>
+          <tr><td style="font-family:var(--font-mono)">codigo_ia_pct</td><td><span class="pill pill-blue">FLOAT</span></td><td>% do código gerado por IA (Copilot/Cursor metadata)</td><td>IDE telemetria</td></tr>
+          <tr><td style="font-family:var(--font-mono)">deploy_sucesso</td><td><span class="pill pill-green">BOOL</span></td><td>True se deploy não gerou rollback/hotfix</td><td>GitHub + CI/CD</td></tr>
+          <tr><td style="font-family:var(--font-mono)">falhou_producao</td><td><span class="pill pill-green">BOOL</span></td><td>True se houve incidente pós-deploy</td><td>PagerDuty / Monitor</td></tr>
+          <tr><td style="font-family:var(--font-mono)">mttr_minutos</td><td><span class="pill pill-blue">FLOAT</span></td><td>Minutos para restaurar serviço (quando falhou)</td><td>PagerDuty</td></tr>
+          <tr><td style="font-family:var(--font-mono)">conversao_produto_delta</td><td><span class="pill pill-blue">FLOAT</span></td><td>Variação % de conversão 7 dias pós-deploy</td><td>Analytics / GA4</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SQL DE CRIAÇÃO -->
+    <div class="sec-header">
+      <div class="sec-title" style="font-size:16px">DDL — SQL de Criação das Tabelas</div>
+      <div class="sec-sub">BigQuery / Snowflake compatible</div>
+    </div>
+    <div class="sql-block">
+<span class="sql-cmt">-- ============================================================</span><br>
+<span class="sql-cmt">-- DIMENSÃO: dim_time</span><br>
+<span class="sql-cmt">-- ============================================================</span><br>
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dim_time</span> (<br>
+&nbsp;&nbsp;time_key        <span class="sql-str">INTEGER</span>     <span class="sql-kw">PRIMARY KEY</span>,<br>
+&nbsp;&nbsp;data_deploy     <span class="sql-str">DATE</span>        <span class="sql-kw">NOT NULL</span>,<br>
+&nbsp;&nbsp;ano             <span class="sql-str">SMALLINT</span>,<br>
+&nbsp;&nbsp;semestre        <span class="sql-str">SMALLINT</span>,<br>
+&nbsp;&nbsp;trimestre       <span class="sql-str">SMALLINT</span>,<br>
+&nbsp;&nbsp;mes             <span class="sql-str">SMALLINT</span>,<br>
+&nbsp;&nbsp;semana_ano      <span class="sql-str">SMALLINT</span>,<br>
+&nbsp;&nbsp;dia_semana      <span class="sql-str">VARCHAR(15)</span>,<br>
+&nbsp;&nbsp;hora_deploy     <span class="sql-str">SMALLINT</span>,<br>
+&nbsp;&nbsp;e_horario_comercial <span class="sql-str">BOOLEAN</span><br>
+);<br><br>
+<span class="sql-cmt">-- ============================================================</span><br>
+<span class="sql-cmt">-- DIMENSÃO: dim_repository</span><br>
+<span class="sql-cmt">-- ============================================================</span><br>
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dim_repository</span> (<br>
+&nbsp;&nbsp;repo_key            <span class="sql-str">INTEGER</span>     <span class="sql-kw">PRIMARY KEY</span>,<br>
+&nbsp;&nbsp;github_repo_id      <span class="sql-str">BIGINT</span>      <span class="sql-kw">UNIQUE NOT NULL</span>,<br>
+&nbsp;&nbsp;nome_repo           <span class="sql-str">VARCHAR(255)</span>,<br>
+&nbsp;&nbsp;squad_owner         <span class="sql-str">VARCHAR(100)</span>,<br>
+&nbsp;&nbsp;linguagem_principal <span class="sql-str">VARCHAR(50)</span>,<br>
+&nbsp;&nbsp;tipo                <span class="sql-str">VARCHAR(30)</span>,  <span class="sql-cmt">-- backend | frontend | mobile | infra</span><br>
+&nbsp;&nbsp;criticidade         <span class="sql-str">VARCHAR(10)</span>   <span class="sql-cmt">-- P0 | P1 | P2</span><br>
+);<br><br>
+<span class="sql-cmt">-- ============================================================</span><br>
+<span class="sql-cmt">-- DIMENSÃO: dim_engineer</span><br>
+<span class="sql-cmt">-- ============================================================</span><br>
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dim_engineer</span> (<br>
+&nbsp;&nbsp;eng_key             <span class="sql-str">INTEGER</span>     <span class="sql-kw">PRIMARY KEY</span>,<br>
+&nbsp;&nbsp;github_login        <span class="sql-str">VARCHAR(100)</span> <span class="sql-kw">UNIQUE</span>,<br>
+&nbsp;&nbsp;nome_engenheiro     <span class="sql-str">VARCHAR(200)</span>,<br>
+&nbsp;&nbsp;squad               <span class="sql-str">VARCHAR(100)</span>,<br>
+&nbsp;&nbsp;nivel               <span class="sql-str">VARCHAR(10)</span>,  <span class="sql-cmt">-- jr | pl | sr | staff</span><br>
+&nbsp;&nbsp;usa_ia_assistida    <span class="sql-str">BOOLEAN</span>,<br>
+&nbsp;&nbsp;ferramenta_ia       <span class="sql-str">VARCHAR(50)</span>,  <span class="sql-cmt">-- copilot | cursor | codewhisperer</span><br>
+&nbsp;&nbsp;anos_experiencia    <span class="sql-str">SMALLINT</span><br>
+);<br><br>
+<span class="sql-cmt">-- ============================================================</span><br>
+<span class="sql-cmt">-- DIMENSÃO: dim_feature</span><br>
+<span class="sql-cmt">-- ============================================================</span><br>
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">dim_feature</span> (<br>
+&nbsp;&nbsp;feature_key     <span class="sql-str">INTEGER</span>     <span class="sql-kw">PRIMARY KEY</span>,<br>
+&nbsp;&nbsp;jira_ticket_id  <span class="sql-str">VARCHAR(30)</span> <span class="sql-kw">UNIQUE NOT NULL</span>,<br>
+&nbsp;&nbsp;tipo            <span class="sql-str">VARCHAR(20)</span>, <span class="sql-cmt">-- bug | feature | chore | refactor</span><br>
+&nbsp;&nbsp;epico           <span class="sql-str">VARCHAR(255)</span>,<br>
+&nbsp;&nbsp;squad           <span class="sql-str">VARCHAR(100)</span>,<br>
+&nbsp;&nbsp;prioridade      <span class="sql-str">VARCHAR(10)</span>  <span class="sql-cmt">-- Critical | High | Medium | Low</span><br>
+);<br><br>
+<span class="sql-cmt">-- ============================================================</span><br>
+<span class="sql-cmt">-- FATO: fato_deploys (tabela central)</span><br>
+<span class="sql-cmt">-- ============================================================</span><br>
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-tbl">fato_deploys</span> (<br>
+&nbsp;&nbsp;deploy_id               <span class="sql-str">BIGINT</span>   <span class="sql-kw">PRIMARY KEY</span>,<br>
+&nbsp;&nbsp;time_key                <span class="sql-str">INTEGER</span>  <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dim_time</span>,<br>
+&nbsp;&nbsp;repo_key                <span class="sql-str">INTEGER</span>  <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dim_repository</span>,<br>
+&nbsp;&nbsp;eng_key                 <span class="sql-str">INTEGER</span>  <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dim_engineer</span>,<br>
+&nbsp;&nbsp;feature_key             <span class="sql-str">INTEGER</span>  <span class="sql-kw">REFERENCES</span> <span class="sql-tbl">dim_feature</span>,<br>
+&nbsp;&nbsp;<span class="sql-cmt">-- Métricas de velocidade</span><br>
+&nbsp;&nbsp;lead_time_horas         <span class="sql-str">FLOAT</span>,<br>
+&nbsp;&nbsp;tempo_review_horas      <span class="sql-str">FLOAT</span>,<br>
+&nbsp;&nbsp;qtd_revisores           <span class="sql-str">INTEGER</span>,<br>
+&nbsp;&nbsp;<span class="sql-cmt">-- Métricas de volume</span><br>
+&nbsp;&nbsp;qtd_commits             <span class="sql-str">INTEGER</span>,<br>
+&nbsp;&nbsp;linhas_adicionadas      <span class="sql-str">INTEGER</span>,<br>
+&nbsp;&nbsp;linhas_removidas        <span class="sql-str">INTEGER</span>,<br>
+&nbsp;&nbsp;codigo_ia_pct           <span class="sql-str">FLOAT</span>,    <span class="sql-cmt">-- 0.0 a 1.0</span><br>
+&nbsp;&nbsp;<span class="sql-cmt">-- Métricas de qualidade</span><br>
+&nbsp;&nbsp;deploy_sucesso          <span class="sql-str">BOOLEAN</span>,<br>
+&nbsp;&nbsp;falhou_producao         <span class="sql-str">BOOLEAN</span>,<br>
+&nbsp;&nbsp;mttr_minutos            <span class="sql-str">FLOAT</span>,<br>
+&nbsp;&nbsp;<span class="sql-cmt">-- Métricas de valor de produto</span><br>
+&nbsp;&nbsp;conversao_produto_delta <span class="sql-str">FLOAT</span>    <span class="sql-cmt">-- variação % conversão 7d pós-deploy</span><br>
+);
+    </div>
+
+    <!-- SQL DE ANÁLISE -->
+    <div class="sec-header" style="margin-top:1.5rem;">
+      <div class="sec-title" style="font-size:16px">SQL de Análise — Consultas Estratégicas</div>
+      <div class="sec-sub">Queries para cálculo das métricas DORA</div>
+    </div>
+    <div class="sql-block">
+<span class="sql-cmt">-- Lead Time médio por squad (últimos 90 dias)</span><br>
+<span class="sql-kw">SELECT</span><br>
+&nbsp;&nbsp;r.squad_owner,<br>
+&nbsp;&nbsp;<span class="sql-fn">ROUND</span>(<span class="sql-fn">AVG</span>(f.lead_time_horas) / <span class="sql-num">24</span>, <span class="sql-num">1</span>)  <span class="sql-kw">AS</span> lead_time_dias,<br>
+&nbsp;&nbsp;<span class="sql-fn">ROUND</span>(<span class="sql-fn">AVG</span>(f.tempo_review_horas), <span class="sql-num">1</span>)       <span class="sql-kw">AS</span> avg_review_horas,<br>
+&nbsp;&nbsp;<span class="sql-fn">COUNT</span>(*)                                   <span class="sql-kw">AS</span> total_deploys,<br>
+&nbsp;&nbsp;<span class="sql-fn">ROUND</span>(<span class="sql-fn">SUM</span>(f.falhou_producao::INT) * <span class="sql-num">100.0</span> / <span class="sql-fn">COUNT</span>(*), <span class="sql-num">1</span>) <span class="sql-kw">AS</span> cfr_pct<br>
+<span class="sql-kw">FROM</span> <span class="sql-tbl">fato_deploys</span> f<br>
+<span class="sql-kw">JOIN</span> <span class="sql-tbl">dim_repository</span> r <span class="sql-kw">ON</span> f.repo_key = r.repo_key<br>
+<span class="sql-kw">JOIN</span> <span class="sql-tbl">dim_time</span> t      <span class="sql-kw">ON</span> f.time_key = t.time_key<br>
+<span class="sql-kw">WHERE</span> t.data_deploy &gt;= <span class="sql-fn">CURRENT_DATE</span> - <span class="sql-kw">INTERVAL</span> <span class="sql-str">'90 days'</span><br>
+<span class="sql-kw">GROUP BY</span> r.squad_owner<br>
+<span class="sql-kw">ORDER BY</span> lead_time_dias <span class="sql-kw">ASC</span>;<br><br>
+
+<span class="sql-cmt">-- Impacto da IA na qualidade do código</span><br>
+<span class="sql-kw">SELECT</span><br>
+&nbsp;&nbsp;<span class="sql-kw">CASE</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="sql-kw">WHEN</span> f.codigo_ia_pct &lt; <span class="sql-num">0.3</span>  <span class="sql-kw">THEN</span> <span class="sql-str">'baixo_ia'</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="sql-kw">WHEN</span> f.codigo_ia_pct &lt; <span class="sql-num">0.7</span>  <span class="sql-kw">THEN</span> <span class="sql-str">'medio_ia'</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="sql-kw">ELSE</span>                           <span class="sql-str">'alto_ia'</span><br>
+&nbsp;&nbsp;<span class="sql-kw">END</span> <span class="sql-kw">AS</span> faixa_ia,<br>
+&nbsp;&nbsp;<span class="sql-fn">COUNT</span>(*)                          <span class="sql-kw">AS</span> total_deploys,<br>
+&nbsp;&nbsp;<span class="sql-fn">ROUND</span>(<span class="sql-fn">AVG</span>(f.lead_time_horas),<span class="sql-num">1</span>)  <span class="sql-kw">AS</span> avg_lead_time_h,<br>
+&nbsp;&nbsp;<span class="sql-fn">ROUND</span>(<span class="sql-fn">AVG</span>(f.falhou_producao::INT)*<span class="sql-num">100</span>,<span class="sql-num">1</span>) <span class="sql-kw">AS</span> cfr_pct,<br>
+&nbsp;&nbsp;<span class="sql-fn">ROUND</span>(<span class="sql-fn">AVG</span>(f.conversao_produto_delta)*<span class="sql-num">100</span>,<span class="sql-num">2</span>) <span class="sql-kw">AS</span> impacto_conversao_pct<br>
+<span class="sql-kw">FROM</span> <span class="sql-tbl">fato_deploys</span> f<br>
+<span class="sql-kw">GROUP BY</span> faixa_ia<br>
+<span class="sql-kw">ORDER BY</span> faixa_ia;
+    </div>
+  </div>
+</section>
+
+<!-- SECTION: PIPELINE ELT -->
+<section id="pipeline">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-title">Arquitetura de Dados — Pipeline ELT</div>
+      <div class="sec-sub">Extract → Load → Transform · Cloud-native</div>
+    </div>
+
+    <!-- PIPELINE VISUAL -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">Fluxo do Pipeline</div>
+      <div class="pipeline" style="padding:.5rem 0;">
+        <div class="pipe-step">
+          <span class="pipe-badge" style="background:rgba(91,143,255,.15);color:var(--accent2)">EXTRACT</span>
+          <div class="pipe-layer">Fontes de Dados</div>
+          <div class="pipe-name">GitHub API</div>
+          <div class="pipe-detail">PRs · Commits · Reviews · CI/CD events</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-layer">Fontes de Dados</div>
+          <div class="pipe-name">Jira API</div>
+          <div class="pipe-detail">Tickets · Sprints · Épicos · Status</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <span class="pipe-badge" style="background:rgba(167,139,250,.15);color:var(--accent5)">LOAD</span>
+          <div class="pipe-layer">Raw Layer</div>
+          <div class="pipe-name">Data Lake</div>
+          <div class="pipe-detail">GCS / S3 · JSON bruto · sem transformação</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <span class="pipe-badge" style="background:rgba(246,166,35,.15);color:var(--accent3)">LOAD</span>
+          <div class="pipe-layer">Staging Layer</div>
+          <div class="pipe-name">BigQuery Raw</div>
+          <div class="pipe-detail">Tabelas raw_github_* · raw_jira_*</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <span class="pipe-badge" style="background:rgba(62,207,142,.15);color:var(--accent)">TRANSFORM</span>
+          <div class="pipe-layer">dbt Models</div>
+          <div class="pipe-name">Star Schema</div>
+          <div class="pipe-detail">fato_deploys · dim_* · métricas DORA</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-layer">Consumo</div>
+          <div class="pipe-name">Looker Studio</div>
+          <div class="pipe-detail">Dashboards CTO · Alertas · API BI</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ETAPAS DETALHADAS -->
+    <div class="grid-3" style="margin-bottom:1rem;">
+      <div class="card card-accent-blue">
+        <div class="card-title">🔌 Extração (E)</div>
+        <div style="font-size:13px;margin-top:.5rem;line-height:1.8;">
+          <b style="color:var(--accent2)">GitHub REST API v3</b><br>
+          <span style="color:var(--muted);font-size:12px;font-family:var(--font-mono)">/repos/{org}/{repo}/pulls<br>/repos/.../commits<br>/repos/.../deployments</span>
+          <br><br>
+          <b style="color:var(--accent2)">Jira REST API v3</b><br>
+          <span style="color:var(--muted);font-size:12px;font-family:var(--font-mono)">/rest/api/3/search<br>/rest/api/3/sprint<br>/rest/agile/1.0/board</span>
+          <br><br>
+          <span style="color:var(--muted);font-size:12px">Orquestrador: <b>Apache Airflow</b><br>Frequência: a cada 30 min<br>Auth: OAuth 2.0 + PAT tokens</span>
+        </div>
+      </div>
+      <div class="card card-accent-purple">
+        <div class="card-title">📦 Carga (L)</div>
+        <div style="font-size:13px;margin-top:.5rem;line-height:1.8;">
+          <b style="color:var(--accent5)">Raw Layer — Data Lake</b><br>
+          <span style="color:var(--muted);font-size:12px">Google Cloud Storage<br>Formato: JSON/Parquet<br>Particionado por data</span>
+          <br><br>
+          <b style="color:var(--accent5)">Staging Layer — DW</b><br>
+          <span style="color:var(--muted);font-size:12px">BigQuery datasets:<br>
+          <span style="font-family:var(--font-mono)">raw_github_*<br>raw_jira_*</span><br>
+          Schema auto-detect ON<br>
+          Insert incremental via<br>MERGE statements</span>
+        </div>
+      </div>
+      <div class="card card-accent-green">
+        <div class="card-title">🔧 Transformação (T)</div>
+        <div style="font-size:13px;margin-top:.5rem;line-height:1.8;">
+          <b style="color:var(--accent)">dbt Core</b><br>
+          <span style="color:var(--muted);font-size:12px">Modelos SQL versionados<br>Testes de qualidade built-in<br>Lineage automático</span>
+          <br><br>
+          <b style="color:var(--accent)">Camadas dbt:</b><br>
+          <span style="color:var(--muted);font-size:12px">
+          <span style="font-family:var(--font-mono)">staging/</span> → normalização<br>
+          <span style="font-family:var(--font-mono)">intermediate/</span> → joins<br>
+          <span style="font-family:var(--font-mono)">marts/</span> → fato + dims<br>
+          <span style="font-family:var(--font-mono)">metrics/</span> → DORA KPIs</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ELT vs ETL JUSTIFICATIVA -->
+    <div class="sec-header">
+      <div class="sec-title" style="font-size:16px">Por que ELT e não ETL?</div>
+      <div class="sec-sub">Justificativa técnica da arquitetura</div>
+    </div>
+    <div class="grid-2">
+      <div class="card" style="border-color:rgba(224,90,90,.3);background:rgba(224,90,90,.04)">
+        <div class="card-title" style="color:var(--accent4)">❌ ETL — Problemas neste contexto</div>
+        <div style="font-size:12px;color:var(--muted);line-height:2;margin-top:.5rem;">
+          → Transformação antes da carga = pipeline frágil<br>
+          → Reprocessamento caro se lógica mudar<br>
+          → Difícil exploração ad-hoc dos dados brutos<br>
+          → Ferramentas clássicas (Informatica, SSIS) não escalam bem com APIs REST em tempo real<br>
+          → Data lineage difícil de auditar
+        </div>
+      </div>
+      <div class="card" style="border-color:rgba(62,207,142,.3);background:rgba(62,207,142,.04)">
+        <div class="card-title" style="color:var(--accent)">✅ ELT — Vantagens para a TechFlow</div>
+        <div style="font-size:12px;color:var(--muted);line-height:2;margin-top:.5rem;">
+          → Dados brutos preservados no Data Lake (auditoria total)<br>
+          → BigQuery processa SQL em escala petabyte nativamente<br>
+          → dbt permite iterar na transformação sem re-extrair<br>
+          → Novas métricas = novo model dbt, não novo pipeline<br>
+          → Time de engenharia já conhece SQL (curva de aprendizado baixa)
+        </div>
+      </div>
+    </div>
+
+    <!-- TECH STACK -->
+    <div class="sec-header" style="margin-top:1.5rem;">
+      <div class="sec-title" style="font-size:16px">Stack Tecnológica</div>
+    </div>
+    <div class="card tbl-wrap">
+      <table>
+        <thead><tr><th>Camada</th><th>Tecnologia</th><th>Função</th><th>Justificativa</th></tr></thead>
+        <tbody>
+          <tr><td><span class="pill pill-blue">Ingestão</span></td><td style="font-family:var(--font-mono)">Apache Airflow</td><td>Orquestração dos DAGs de extração</td><td>Open-source, suporte nativo a APIs REST, retry automático</td></tr>
+          <tr><td><span class="pill pill-blue">Ingestão</span></td><td style="font-family:var(--font-mono)">Python + httpx</td><td>Scripts de chamada às APIs</td><td>Assíncrono, leve, fácil de testar</td></tr>
+          <tr><td><span class="pill pill-purple">Storage</span></td><td style="font-family:var(--font-mono)">Google Cloud Storage</td><td>Data Lake para dados brutos</td><td>Custo baixo, integração nativa BigQuery</td></tr>
+          <tr><td><span class="pill pill-orange">DW</span></td><td style="font-family:var(--font-mono)">BigQuery</td><td>Data Warehouse analítico</td><td>Serverless, pay-per-query, excelente para SQL analítico</td></tr>
+          <tr><td><span class="pill pill-green">Transform</span></td><td style="font-family:var(--font-mono)">dbt Core</td><td>Transformações SQL versionadas</td><td>Padrão de mercado, testes, documentação auto-gerada</td></tr>
+          <tr><td><span class="pill pill-green">Transform</span></td><td style="font-family:var(--font-mono)">dbt metrics layer</td><td>Cálculo das métricas DORA</td><td>Definições centralizadas e reutilizáveis</td></tr>
+          <tr><td><span class="pill pill-blue">Viz</span></td><td style="font-family:var(--font-mono)">Looker Studio</td><td>Dashboards para CTO e squads</td><td>Gratuito, conecta diretamente ao BigQuery, compartilhável</td></tr>
+          <tr><td><span class="pill pill-red">Monitor</span></td><td style="font-family:var(--font-mono)">Great Expectations</td><td>Qualidade dos dados no pipeline</td><td>Testes automáticos de schema, nulls, ranges</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION: DASHBOARD CTO -->
+<section id="dashboard">
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <span class="filter-label">SQUAD</span>
+      <select id="fSquad" onchange="updateDashboard()">
+        <option>Todos</option><option>Checkout</option><option>Catálogo</option>
+        <option>Pagamentos</option><option>Auth</option><option>Data Platform</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">REPOSITÓRIO</span>
+      <select id="fRepo" onchange="updateDashboard()">
+        <option>Todos</option><option>api-checkout</option><option>frontend-web</option>
+        <option>payment-service</option><option>auth-service</option><option>data-pipeline</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">PERÍODO</span>
+      <select id="fPeriod" onchange="updateDashboard()">
+        <option>Últimos 30 dias</option><option>Últimos 60 dias</option>
+        <option>Últimos 90 dias</option><option>Último semestre</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">FEATURE</span>
+      <select id="fType" onchange="updateDashboard()">
+        <option>Todos</option><option>Feature</option><option>Bug</option>
+        <option>Refactor</option><option>Chore</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- NÍVEL 1: MACRO DORA -->
+    <div class="sec-header">
+      <div class="sec-title">Nível 1 — Métricas DORA Consolidadas</div>
+      <div class="sec-sub">Visão executiva · atualizado em tempo real</div>
+    </div>
+    <div class="grid-4" style="margin-bottom:1rem;">
+      <div class="card card-accent-orange">
+        <div class="card-title">Lead Time for Change</div>
+        <div class="card-value" id="v-lt" style="color:var(--accent3)">4,2d</div>
+        <div class="card-delta delta-down">↑ +1,1d vs meta (elite: &lt;1d)</div>
+      </div>
+      <div class="card card-accent-red">
+        <div class="card-title">Deploy Frequency</div>
+        <div class="card-value" id="v-df" style="color:var(--accent4)">3,1/sem</div>
+        <div class="card-delta delta-down">↓ abaixo da meta (elite: múltiplos/dia)</div>
+      </div>
+      <div class="card card-accent-red">
+        <div class="card-title">Change Failure Rate</div>
+        <div class="card-value" id="v-cfr" style="color:var(--accent4)">18,4%</div>
+        <div class="card-delta delta-down">↑ +13,4pp vs meta (elite: &lt;5%)</div>
+      </div>
+      <div class="card card-accent-blue">
+        <div class="card-title">MTTR (restauração)</div>
+        <div class="card-value" id="v-mttr" style="color:var(--accent2)">2,3h</div>
+        <div class="card-delta delta-down">↑ +1,3h vs meta (elite: &lt;1h)</div>
+      </div>
+    </div>
+
+    <!-- NÍVEL 2: FILTROS -->
+    <div class="sec-header">
+      <div class="sec-title">Nível 2 — Análise por Squad e Repositório</div>
+      <div class="sec-sub">Filtros ativos nos controles acima</div>
+    </div>
+    <div class="grid-2" style="margin-bottom:1rem;">
+      <div class="chart-box">
+        <div class="chart-head">
+          <div><div class="chart-title">Deploy Frequency por Squad (últimas 8 semanas)</div><div class="chart-sub">Deploys por semana por equipe</div></div>
+        </div>
+        <div class="legend-row">
+          <span><span class="legend-dot" style="background:#3ecf8e"></span>Checkout</span>
+          <span><span class="legend-dot" style="background:#5b8fff"></span>Catálogo</span>
+          <span><span class="legend-dot" style="background:#f6a623"></span>Pagamentos</span>
+          <span><span class="legend-dot" style="background:#e05a5a"></span>Auth</span>
+        </div>
+        <div class="chart-canvas-wrap" style="height:200px">
+          <canvas id="chartDeployFreq" role="img" aria-label="Deploy frequency por squad">Frequência de deploy por squad nas últimas 8 semanas.</canvas>
+        </div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-head">
+          <div><div class="chart-title">Change Failure Rate por Repositório</div><div class="chart-sub">% de deploys com falha pós-produção</div></div>
+        </div>
+        <div class="legend-row">
+          <span><span class="legend-dot" style="background:#e05a5a"></span>CFR atual</span>
+          <span><span class="legend-dot" style="background:rgba(255,255,255,0.15)"></span>Limite elite (5%)</span>
+        </div>
+        <div class="chart-canvas-wrap" style="height:200px">
+          <canvas id="chartCFR" role="img" aria-label="Change failure rate por repositório">Taxa de falha por repositório.</canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- NÍVEL 3: DRILL-DOWN -->
+    <div class="sec-header">
+      <div class="sec-title">Nível 3 — Drill-down: PRs e Revisão de Código</div>
+      <div class="sec-sub">Análise detalhada dos gargalos no code review</div>
+    </div>
+    <div class="grid-2" style="margin-bottom:1rem;">
+      <div class="chart-box">
+        <div class="chart-head">
+          <div><div class="chart-title">Distribuição do Lead Time (horas)</div><div class="chart-sub">Commit → Deploy em produção</div></div>
+        </div>
+        <div class="legend-row">
+          <span><span class="legend-dot" style="background:#5b8fff"></span>Escrita de código</span>
+          <span><span class="legend-dot" style="background:#f6a623"></span>Code Review (GARGALO)</span>
+          <span><span class="legend-dot" style="background:#3ecf8e"></span>CI/CD + Deploy</span>
+        </div>
+        <div class="chart-canvas-wrap" style="height:200px">
+          <canvas id="chartLeadBreak" role="img" aria-label="Decomposição do lead time em fases">Decomposição do lead time por etapa do processo.</canvas>
+        </div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-head">
+          <div><div class="chart-title">Impacto da IA: Código IA vs Falhas</div><div class="chart-sub">Correlação entre % de código gerado por IA e CFR</div></div>
+        </div>
+        <div class="legend-row">
+          <span><span class="legend-dot" style="background:#a78bfa"></span>Taxa de falha pós-deploy</span>
+        </div>
+        <div class="chart-canvas-wrap" style="height:200px">
+          <canvas id="chartIAimpact" role="img" aria-label="Impacto da IA na taxa de falha">Correlação entre uso de IA e change failure rate.</canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABELA DRILL-DOWN PRs -->
+    <div class="card tbl-wrap">
+      <div class="chart-head" style="margin-bottom:.75rem;">
+        <div><div class="chart-title">PRs Recentes — Detalhamento por Engenheiro</div><div class="chart-sub">Top 10 PRs com maior impacto no Lead Time</div></div>
+      </div>
+      <table>
+        <thead><tr>
+          <th>PR</th><th>Engenheiro</th><th>Squad</th><th>Lead Time</th>
+          <th>Tempo Review</th><th>Revisores</th><th>% IA</th><th>Status</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="font-family:var(--font-mono);color:var(--accent2)">#2847</td><td>Ana Costa</td><td>Checkout</td><td style="color:var(--accent3)">8,4d</td><td style="color:var(--accent4)">6,1h</td><td>3</td><td>78%</td><td><span class="pill pill-red">Falhou</span></td></tr>
+          <tr><td style="font-family:var(--font-mono);color:var(--accent2)">#2839</td><td>Bruno Lima</td><td>Pagamentos</td><td style="color:var(--accent3)">6,2d</td><td style="color:var(--accent3)">4,8h</td><td>2</td><td>62%</td><td><span class="pill pill-red">Falhou</span></td></tr>
+          <tr><td style="font-family:var(--font-mono);color:var(--accent2)">#2831</td><td>Carlos Melo</td><td>Catálogo</td><td style="color:var(--accent3)">5,8d</td><td style="color:var(--accent3)">3,9h</td><td>4</td><td>45%</td><td><span class="pill pill-green">Sucesso</span></td></tr>
+          <tr><td style="font-family:var(--font-mono);color:var(--accent2)">#2822</td><td>Diana Rocha</td><td>Auth</td><td style="color:var(--accent)">1,2d</td><td style="color:var(--accent)">1,1h</td><td>2</td><td>20%</td><td><span class="pill pill-green">Sucesso</span></td></tr>
+          <tr><td style="font-family:var(--font-mono);color:var(--accent2)">#2818</td><td>Eduardo Fox</td><td>Checkout</td><td style="color:var(--accent3)">4,7d</td><td style="color:var(--accent3)">4,2h</td><td>1</td><td>89%</td><td><span class="pill pill-red">Falhou</span></td></tr>
+          <tr><td style="font-family:var(--font-mono);color:var(--accent2)">#2811</td><td>Fernanda Alves</td><td>Data Platform</td><td style="color:var(--accent)">0,8d</td><td style="color:var(--accent)">0,9h</td><td>3</td><td>15%</td><td><span class="pill pill-green">Sucesso</span></td></tr>
+          <tr><td style="font-family:var(--font-mono);color:var(--accent2)">#2805</td><td>Gabriel Santos</td><td>Pagamentos</td><td style="color:var(--accent3)">7,1d</td><td style="color:var(--accent4)">5,5h</td><td>2</td><td>91%</td><td><span class="pill pill-red">Falhou</span></td></tr>
+          <tr><td style="font-family:var(--font-mono);color:var(--accent2)">#2799</td><td>Helena Cruz</td><td>Catálogo</td><td style="color:var(--accent)">1,5d</td><td style="color:var(--accent)">1,3h</td><td>3</td><td>30%</td><td><span class="pill pill-green">Sucesso</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION: ANÁLISE ESTRATÉGICA -->
+<section id="estrategia">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-title">Análise Estratégica — Diagnóstico Completo</div>
+      <div class="sec-sub">Conexão entre métricas técnicas e valor de negócio</div>
+    </div>
+
+    <!-- LEAD TIME E IA -->
+    <div class="grid-2" style="margin-bottom:1rem;">
+      <div class="card">
+        <div class="card-title" style="margin-bottom:.75rem;">Lead Time por faixa de uso de IA</div>
+        <div class="prog-bar-wrap">
+          <div class="prog-bar-top"><span>Alto uso IA (&gt;70%)</span><span style="color:var(--accent4)">7,8 dias</span></div>
+          <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:96%;background:var(--accent4)"></div></div>
+        </div>
+        <div class="prog-bar-wrap">
+          <div class="prog-bar-top"><span>Médio uso IA (30-70%)</span><span style="color:var(--accent3)">4,1 dias</span></div>
+          <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:51%;background:var(--accent3)"></div></div>
+        </div>
+        <div class="prog-bar-wrap">
+          <div class="prog-bar-top"><span>Baixo uso IA (&lt;30%)</span><span style="color:var(--accent)">1,9 dias</span></div>
+          <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:23%;background:var(--accent)"></div></div>
+        </div>
+        <div class="prog-bar-wrap">
+          <div class="prog-bar-top"><span>IA + processo estruturado</span><span style="color:var(--accent)">1,1 dias</span></div>
+          <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:14%;background:#a78bfa"></div></div>
+        </div>
+        <div style="margin-top:.75rem;font-size:11px;color:var(--muted)">⚡ Conclusão: IA sem processo estruturado aumenta o Lead Time em 4x</div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:.75rem;">Change Failure Rate por faixa de uso de IA</div>
+        <div class="prog-bar-wrap">
+          <div class="prog-bar-top"><span>Alto uso IA (&gt;70%)</span><span style="color:var(--accent4)">31,2%</span></div>
+          <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:95%;background:var(--accent4)"></div></div>
+        </div>
+        <div class="prog-bar-wrap">
+          <div class="prog-bar-top"><span>Médio uso IA (30-70%)</span><span style="color:var(--accent3)">18,4%</span></div>
+          <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:56%;background:var(--accent3)"></div></div>
+        </div>
+        <div class="prog-bar-wrap">
+          <div class="prog-bar-top"><span>Baixo uso IA (&lt;30%)</span><span style="color:var(--accent)">8,1%</span></div>
+          <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:25%;background:var(--accent)"></div></div>
+        </div>
+        <div class="prog-bar-wrap">
+          <div class="prog-bar-top"><span>IA + processo estruturado</span><span style="color:var(--accent)">4,3%</span></div>
+          <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:13%;background:#a78bfa"></div></div>
+        </div>
+        <div style="margin-top:.75rem;font-size:11px;color:var(--muted)">✅ IA com processo estruturado alcança nível ELITE (&lt;5%)</div>
+      </div>
+    </div>
+
+    <!-- DEPLOYS VS CONVERSÃO -->
+    <div class="sec-header">
+      <div class="sec-title" style="font-size:16px">Conexão: Deploys de Engenharia → Valor de Produto</div>
+      <div class="sec-sub">Deploy frequency vs variação de conversão e receita</div>
+    </div>
+    <div class="chart-box" style="margin-bottom:1rem;">
+      <div class="chart-head">
+        <div><div class="chart-title">Correlação Deploy Frequency × Conversão de Produto (6 meses)</div></div>
+      </div>
+      <div class="legend-row">
+        <span><span class="legend-dot" style="background:#5b8fff"></span>Deploys/semana</span>
+        <span><span class="legend-dot" style="background:#3ecf8e"></span>Taxa de conversão (%)</span>
+        <span><span class="legend-dot" style="background:#f6a623"></span>Receita relativa</span>
+      </div>
+      <div class="chart-canvas-wrap" style="height:220px">
+        <canvas id="chartBizValue" role="img" aria-label="Correlação entre deploys e conversão de produto">Relação entre frequência de deploy e métricas de negócio.</canvas>
+      </div>
+    </div>
+
+    <!-- RECOMENDAÇÕES -->
+    <div class="sec-header">
+      <div class="sec-title" style="font-size:16px">Recomendações Estratégicas para o CTO</div>
+    </div>
+    <div style="display:grid;gap:1rem;">
+      <div class="analysis-block" style="border-color:rgba(91,143,255,.3)">
+        <div class="analysis-icon">🔬</div>
+        <div>
+          <div class="analysis-title" style="color:var(--accent2)">1. Instrumentar o Code Review como prioridade imediata</div>
+          <div class="analysis-text">O gargalo principal está no review (65% do lead time). Implementar revisão assistida por IA (ex: CodeRabbit, GitHub Copilot Review) pode reduzir o tempo de review de 4,8h para 1,5h. Adicionalmente, definir SLA de review por prioridade: features P0 = máximo 2h, features P1 = máximo 8h.</div>
+        </div>
+      </div>
+      <div class="analysis-block" style="border-color:rgba(62,207,142,.3)">
+        <div class="analysis-icon">📏</div>
+        <div>
+          <div class="analysis-title" style="color:var(--accent)">2. Definir política de PR size limit</div>
+          <div class="analysis-text">PRs com mais de 400 linhas têm 3,2x maior probabilidade de falha e 5,1x maior tempo de review. Implementar hard limit de 500 linhas por PR e quebrar features complexas em múltiplos PRs atômicos. O BI monitorará esse KPI semanalmente via fato_deploys.linhas_adicionadas.</div>
+        </div>
+      </div>
+      <div class="analysis-block" style="border-color:rgba(246,166,35,.3)">
+        <div class="analysis-icon">🤖</div>
+        <div>
+          <div class="analysis-title" style="color:var(--accent3)">3. Criar "AI Usage Guidelines" com gates de qualidade</div>
+          <div class="analysis-text">Engenheiros com alto uso de IA (&gt;70%) sem processo estruturado apresentam CFR de 31%. Implementar checklist obrigatório pré-merge para código gerado por IA: testes unitários mínimos 80% coverage, revisão de 2+ engenheiros sênior, análise estática (SonarQube) passando. A coluna fato_deploys.codigo_ia_pct + deploy_sucesso permitirá medir o impacto desta política.</div>
+        </div>
+      </div>
+      <div class="analysis-block" style="border-color:rgba(167,139,250,.3)">
+        <div class="analysis-icon">📈</div>
+        <div>
+          <div class="analysis-title" style="color:var(--accent5)">4. Conectar metas de engenharia a OKRs de produto</div>
+          <div class="analysis-text">Os dados mostram correlação positiva (r=0,72) entre deploy frequency e taxa de conversão do produto. Squads com 7+ deploys/semana apresentaram +4,2% de conversão no período analisado. Proposta: incluir métricas DORA como KR no OKR Q3 da engenharia, com dashboard de progresso acessível ao CTO em tempo real.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUMÁRIO EXECUTIVO -->
+    <div class="sec-header" style="margin-top:1.5rem;">
+      <div class="sec-title" style="font-size:16px">Sumário Executivo — Para o CTO</div>
+    </div>
+    <div class="card" style="border-color:rgba(62,207,142,.2);background:rgba(62,207,142,.03)">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;text-align:center;">
+        <div>
+          <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--accent4)">❌</div>
+          <div style="font-size:13px;font-weight:600;margin:.5rem 0;">Diagnóstico atual</div>
+          <div style="font-size:12px;color:var(--muted)">IA aumentando volume de código, mas amplificando instabilidade. CFR 18,4% — 3,7x acima do nível elite. Code review é o gargalo crítico.</div>
+        </div>
+        <div style="border-left:1px solid var(--border);border-right:1px solid var(--border);">
+          <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--accent3)">🔧</div>
+          <div style="font-size:13px;font-weight:600;margin:.5rem 0;">Ação necessária</div>
+          <div style="font-size:12px;color:var(--muted)">Implementar BI + processo estruturado de review. Políticas de PR size, AI gates, SLAs de review. O dashboard permite monitoramento semanal.</div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--accent)">🎯</div>
+          <div style="font-size:13px;font-weight:600;margin:.5rem 0;">Meta em 90 dias</div>
+          <div style="font-size:12px;color:var(--muted)">Lead Time &lt; 2 dias · CFR &lt; 8% · Deploy Frequency &gt; 7/sem · MTTR &lt; 1h. Projeção: +3-5% conversão de produto.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>TechFlow BI · Business Intelligence for Software Engineers · UniFECAF 2025</span>
+  <span>Framework DORA 2025 · Star Schema · ELT Architecture</span>
+</footer>
+
+<script>
+function showSection(id) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const tabs = ['overview','modelagem','pipeline','dashboard','estrategia'];
+  document.querySelectorAll('.nav-tab')[tabs.indexOf(id)].classList.add('active');
+  if (!chartsBuilt) { buildCharts(); chartsBuilt = true; }
+}
+
+let chartsBuilt = false;
+const WEEKS = ['S1','S2','S3','S4','S5','S6','S7','S8'];
+const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun'];
+
+function buildCharts() {
+  const gridColor = 'rgba(255,255,255,0.06)';
+  const tickColor = '#7a8099';
+  const defOpts = (yTitle) => ({
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 } } },
+      y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 } }, title: { display: !!yTitle, text: yTitle, color: tickColor, font: { size: 11 } } }
+    }
+  });
+
+  // Chart: Tendência
+  new Chart(document.getElementById('chartTendencia'), {
+    type: 'line',
+    data: {
+      labels: MONTHS,
+      datasets: [
+        { label:'Deploys/sem', data:[2.1,2.8,3.4,3.8,4.1,3.1], borderColor:'#5b8fff', backgroundColor:'rgba(91,143,255,0.1)', tension:.4, fill:true, pointRadius:4 },
+        { label:'Falhas%', data:[9.2,10.8,13.1,16.5,19.2,18.4], borderColor:'#e05a5a', backgroundColor:'rgba(224,90,90,0.1)', tension:.4, fill:true, pointRadius:4, borderDash:[5,4] }
+      ]
+    },
+    options: defOpts()
+  });
+
+  // Chart: Lead time por squad (horizontal bar)
+  const squadHeight = Math.max(5 * 40 + 80, 220);
+  document.getElementById('chartSquad').parentElement.style.height = squadHeight + 'px';
+  new Chart(document.getElementById('chartSquad'), {
+    type: 'bar',
+    data: {
+      labels: ['Data Platform','Auth','Catálogo','Pagamentos','Checkout'],
+      datasets: [
+        { label:'Lead Time (dias)', data:[1.1,1.8,3.4,5.8,7.2], backgroundColor:['#3ecf8e','#3ecf8e','#f6a623','#e05a5a','#e05a5a'] }
+      ]
+    },
+    options: { ...defOpts('dias'), indexAxis:'y', plugins: { legend: { display: false } }, scales: {
+      x: { grid:{color:gridColor}, ticks:{color:tickColor,font:{size:11}}, max: 9 },
+      y: { grid:{color:gridColor}, ticks:{color:tickColor,font:{size:11}} }
+    }}
+  });
+
+  // Chart: Deploy frequency por squad
+  new Chart(document.getElementById('chartDeployFreq'), {
+    type: 'line',
+    data: {
+      labels: WEEKS,
+      datasets: [
+        { label:'Checkout', data:[4,5,6,7,5,8,7,9], borderColor:'#3ecf8e', tension:.4, pointRadius:3 },
+        { label:'Catálogo', data:[3,3,4,4,5,4,5,6], borderColor:'#5b8fff', tension:.4, pointRadius:3 },
+        { label:'Pagamentos', data:[1,2,2,1,3,2,1,2], borderColor:'#f6a623', tension:.4, pointRadius:3, borderDash:[4,3] },
+        { label:'Auth', data:[2,2,3,2,2,3,2,3], borderColor:'#e05a5a', tension:.4, pointRadius:3, borderDash:[4,3] }
+      ]
+    },
+    options: defOpts('deploys/sem')
+  });
+
+  // Chart: CFR por repo (bar)
+  const cfrH = Math.max(5 * 40 + 80, 200);
+  document.getElementById('chartCFR').parentElement.style.height = cfrH + 'px';
+  new Chart(document.getElementById('chartCFR'), {
+    type: 'bar',
+    data: {
+      labels: ['data-pipeline','auth-service','frontend-web','api-checkout','payment-service'],
+      datasets: [
+        { label:'CFR%', data:[3.1,6.2,15.8,22.4,28.7], backgroundColor:['#3ecf8e','#5b8fff','#f6a623','#e05a5a','#e05a5a'] },
+        { label:'Elite (5%)', data:[5,5,5,5,5], type:'line', borderColor:'rgba(255,255,255,0.3)', borderDash:[4,3], pointRadius:0, fill:false }
+      ]
+    },
+    options: { ...defOpts('%'), indexAxis:'y', plugins:{legend:{display:false}}, scales:{
+      x:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:11}},max:35},
+      y:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:11}}}
+    }}
+  });
+
+  // Chart: Lead time breakdown (stacked bar)
+  new Chart(document.getElementById('chartLeadBreak'), {
+    type: 'bar',
+    data: {
+      labels: ['Checkout','Catálogo','Pagamentos','Auth','Data Platform'],
+      datasets: [
+        { label:'Escrita código', data:[18,14,22,8,6], backgroundColor:'#5b8fff' },
+        { label:'Code Review', data:[98,54,88,24,14], backgroundColor:'#f6a623' },
+        { label:'CI/CD + Deploy', data:[6,8,5,4,3], backgroundColor:'#3ecf8e' }
+      ]
+    },
+    options: { ...defOpts('horas'), plugins:{legend:{display:false}}, scales:{
+      x:{stacked:true,grid:{color:gridColor},ticks:{color:tickColor,font:{size:11}}},
+      y:{stacked:true,grid:{color:gridColor},ticks:{color:tickColor,font:{size:11}}}
+    }}
+  });
+
+  // Chart: IA impact
+  new Chart(document.getElementById('chartIAimpact'), {
+    type: 'bar',
+    data: {
+      labels: ['<30% IA','30-50% IA','50-70% IA','70-90% IA','>90% IA'],
+      datasets: [{ label:'CFR%', data:[8.1,12.3,18.4,26.1,31.2], backgroundColor:['#3ecf8e','#5b8fff','#f6a623','#e05a5a','#e05a5a'] }]
+    },
+    options: { ...defOpts('CFR %'), plugins:{legend:{display:false}} }
+  });
+
+  // Chart: Biz value
+  new Chart(document.getElementById('chartBizValue'), {
+    type: 'line',
+    data: {
+      labels: MONTHS,
+      datasets: [
+        { label:'Deploys/sem', data:[2.1,2.8,3.4,3.8,4.1,3.1], borderColor:'#5b8fff', tension:.4, yAxisID:'y', pointRadius:4 },
+        { label:'Conversão%', data:[2.8,3.1,3.4,3.7,4.1,3.6], borderColor:'#3ecf8e', tension:.4, yAxisID:'y2', pointRadius:4 },
+        { label:'Receita rel.', data:[100,108,118,127,141,131], borderColor:'#f6a623', tension:.4, yAxisID:'y3', pointRadius:4, borderDash:[4,3] }
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{
+      x:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:11}}},
+      y:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:11}},title:{display:true,text:'Deploys/sem',color:tickColor,font:{size:10}},position:'left'},
+      y2:{grid:{display:false},ticks:{color:tickColor,font:{size:11}},title:{display:true,text:'Conversão%',color:tickColor,font:{size:10}},position:'right'},
+      y3:{display:false}
+    }}
+  });
+}
+
+// Build charts on first load (overview section)
+window.addEventListener('load', () => { buildCharts(); chartsBuilt = true; });
+function updateDashboard() { /* Filtros interativos — em produção fariam queries no DW */ }
+</script>
+</body>
+</html>
