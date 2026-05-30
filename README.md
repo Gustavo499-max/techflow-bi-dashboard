@@ -67,6 +67,10 @@ Depois abra:
 
 http://localhost:5500
 
+
+### Opção 3- link direto para o site 
+
+https://gustavo499-max.github.io/techflow-bi-dashboard/
 ---
 
 ## Estrutura
